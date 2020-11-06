@@ -6,13 +6,41 @@
       xmlns:p="http://primefaces.org/ui">
 
     <h:head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <h:outputStylesheet name="./css/default.css"/>
-        <h:outputStylesheet name="./css/cssLayout.css"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />       
         <title>
             <ui:insert name="titulo_perros">            
             </ui:insert>
         </title>
+         <style type="text/css">
+                .ui-diagram-element {   
+                    width:6em; 
+                    height:4em;     
+                    line-height:4em;
+                    text-align: center;
+                    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.8);
+                    border-radius: 4px;
+                    border: 1px solid transparent;                    
+                    background-image: url("resources/imagenes/firulais.png");
+                    color: #ffffff;
+                }
+
+                .ui-diagram-success {
+                    background-color: red;
+                    color: #ffffff;
+                    border-color: #7ab02c;
+                }
+
+                .ui-diagram-fail {
+                    background-color: #C34A2C;
+                    color: #ffffff;
+                }
+
+                .flow-label {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #816A51;
+                }
+            </style>
         
         
     </h:head>
@@ -25,9 +53,10 @@
                     <p:menubar>
                         <p:submenu label="Inicio" icon="pi pi-file">
                             <p:submenu label="Gestión Perros" icon="pi pi-briefcase">
-                                <p:menuitem value="Listar Perros" action="home"  />
-                                <p:menuitem value="Ingresar Perro" action="ingresar_perro" />
+                                <p:menuitem value="Listar Perros" action="#{listaSEController.irHome()}" ajax="false"  />
+                                <p:menuitem value="Ingresar Perro" action="#{listaSEController.irCrearPerro()}" />
                             </p:submenu>
+                            <p:menuitem value="Ejemplo estudiantes" action="ejemplo_estudiantes"/>
                             <p:menuitem value="Open" url="#" />
                             <p:separator />
                             <p:menuitem value="Quit" url="#" />
@@ -39,7 +68,7 @@
 
         <div id="content" class="center_content">
             <ui:insert name="content">
-                <p:growl id="grwlErrores"/>
+                
             </ui:insert>
         </div>
 

@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="./templates/principal.xhtml"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <ui:define name="content">
+
+        <p:growl id="grwEstudiantes"/>
+        <p:panel header="Revisando avances">
+            <h:form prependId="false" id="frmEstudiantes">
+                <p:dataTable value="#{estudiantesBean.listadoEstudiantes}"
+                             var="est">
+                    <p:column>
+                        <f:facet name="header">
+                            <p:outputLabel value="Código"/>
+                        </f:facet>
+                        <p:outputLabel value="#{est.codigo}"/>
+                    </p:column>
+
+                    <p:column>
+                        <f:facet name="header">
+                            <p:outputLabel value="Nombre"/>
+                        </f:facet>
+                        <p:outputLabel value="#{est.nombre}"/>
+
+                    </p:column>
+
+                    <p:column>
+                        <f:facet name="header">
+                            <p:outputLabel value="Selección"/>
+                        </f:facet>
+                        <p:commandButton value="Seleccionar" immediate="true">
+                            <p:ajax listener="#{estudiantesBean.seleccionarEstudiante(est)}"
+                                    update="selecc"/>
+
+                        </p:commandButton>
+
+                    </p:column>
+
+                </p:dataTable>
+            </h:form>
+            <h:form id="frmEst" prependId="false">
+                <p:panel id="selecc" header="Estudiante Seleccionado">
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="Código:"/>
+                        <p:outputLabel value="#{estudiantesBean.estSelec.estudiante.codigo}" />
+                        <p:outputLabel value="Nombre:"/>
+                        <p:outputLabel value="#{estudiantesBean.estSelec.estudiante.nombre}"/>
+                        <p:outputLabel value="Nota:"/>
+                        <p:inputText value="#{estudiantesBean.estSelec.nota}"/>
+
+<!--<p:spinner id="spiner" value="#{estudiantesBean.estSelec.nota}"
+           min="0" max="5"/>    -->
+                    </p:panelGrid>
+                    <p:commandButton value="Agregar">
+                        <p:ajax listener="#{estudiantesBean.agregarRevision()}"
+                                update="tblRevisiones,selecc" process="frmEst"/>
+                    </p:commandButton>
+
+
+                </p:panel>
+            </h:form>
+
+            <p:dataTable id="tblRevisiones" value="#{estudiantesBean.revisiones}" var="rev">
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Código"/>
+                    </f:facet>
+                    <p:outputLabel value="#{rev.estudiante.codigo}"/>
+                </p:column>
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Nombre"/>
+                    </f:facet>
+                    <p:outputLabel value="#{rev.estudiante.nombre}"/>
+                </p:column>
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Nota"/>
+                    </f:facet>
+                    <p:outputLabel value="#{rev.nota}"/>
+                </p:column>
+
+            </p:dataTable>
+
+
+
+
+        </p:panel>
+
+
+    </ui:define>
+
+</ui:composition>

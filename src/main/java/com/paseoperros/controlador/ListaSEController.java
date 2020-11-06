@@ -12,6 +12,16 @@ import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import javax.annotation.PostConstruct;
+import org.primefaces.model.diagram.Connection;
+import org.primefaces.model.diagram.DefaultDiagramModel;
+import org.primefaces.model.diagram.DiagramModel;
+import org.primefaces.model.diagram.Element;
+import org.primefaces.model.diagram.connector.FlowChartConnector;
+import org.primefaces.model.diagram.endpoint.BlankEndPoint;
+import org.primefaces.model.diagram.endpoint.EndPoint;
+import org.primefaces.model.diagram.endpoint.EndPointAnchor;
+import org.primefaces.model.diagram.overlay.ArrowOverlay;
+import org.primefaces.model.diagram.overlay.LabelOverlay;
 
 /**
  *
@@ -26,6 +36,25 @@ public class ListaSEController implements Serializable {
     private Perro perroMostrar;
 
     private Nodo temp;
+
+    private int datobuscar;
+
+    private Perro perroEncontrado;
+
+    private DefaultDiagramModel model;
+    
+    private int seleccionUbicacion=0;
+    
+    private int totalPerros=0;
+    
+    
+    private String textoBotonIniciar;
+    
+    private boolean estadoCiclo;
+    
+    private String colorBoton;
+    
+    private Nodo ayudanteColor;
 
     /**
      * Creates a new instance of ListaSEController
@@ -45,7 +74,79 @@ public class ListaSEController implements Serializable {
         listaPerros.adicionarNodoAlInicio(new Perro("Rocky", (byte) 4, (byte) 5));
         perroMostrar = listaPerros.getCabeza().getDato();
         temp = listaPerros.getCabeza();
+        totalPerros = listaPerros.contarNodos();
+        textoBotonIniciar="Iniciar";
+        estadoCiclo=false;
+        colorBoton ="blue";
+        ayudanteColor = listaPerros.getCabeza();
+        inicializarModelo();        
+       
 
+    }
+
+    public String getColorBoton() {
+        return colorBoton;
+    }
+
+    public void setColorBoton(String colorBoton) {
+        this.colorBoton = colorBoton;
+    }
+    
+
+    
+    
+    public String getTextoBotonIniciar() {
+        return textoBotonIniciar;
+    }
+
+    public void setTextoBotonIniciar(String textoBotonIniciar) {
+        this.textoBotonIniciar = textoBotonIniciar;
+    }
+
+    public boolean isEstadoCiclo() {
+        return estadoCiclo;
+    }
+
+    public void setEstadoCiclo(boolean estadoCiclo) {
+        this.estadoCiclo = estadoCiclo;
+    }
+    
+    
+
+    public int getTotalPerros() {
+        return totalPerros;
+    }
+
+    public void setTotalPerros(int totalPerros) {
+        this.totalPerros = totalPerros;
+    }
+    
+    
+
+    public int getSeleccionUbicacion() {
+        return seleccionUbicacion;
+    }
+
+    public void setSeleccionUbicacion(int seleccionUbicacion) {
+        this.seleccionUbicacion = seleccionUbicacion;
+    }
+    
+    
+
+    public int getDatobuscar() {
+        return datobuscar;
+    }
+
+    public void setDatobuscar(int datobuscar) {
+        this.datobuscar = datobuscar;
+    }
+
+    public Perro getPerroEncontrado() {
+        return perroEncontrado;
+    }
+
+    public void setPerroEncontrado(Perro perroEncontrado) {
+        this.perroEncontrado = perroEncontrado;
     }
 
     public Nodo getTemp() {
@@ -81,12 +182,19 @@ public class ListaSEController implements Serializable {
     }
 
     public void irPrimero() {
-        temp = listaPerros.getCabeza();
-        perroMostrar = temp.getDato();
+        if(listaPerros.getCabeza()!=null)
+        {
+            temp = listaPerros.getCabeza();
+            perroMostrar = temp.getDato();            
+        }
+        else
+        {
+            JsfUtil.addErrorMessage("No existen datos en la lista");
+        }
     }
 
     public void irUltimo() {
-        
+
         temp = listaPerros.getCabeza();
         while (temp.getSiguiente() != null) {
             temp = temp.getSiguiente();
@@ -95,17 +203,141 @@ public class ListaSEController implements Serializable {
         perroMostrar = temp.getDato();
     }
 
-    public void invertir()
-    {
-        listaPerros.invertir();
+    public void invertir() {
+        listaPerros.invertir();        
         irPrimero();
+        inicializarModelo();
     }
-    
-    public void intercambiar()
-    {
+
+    public void intercambiar() {
         listaPerros.intercambiarExtremos();
         irPrimero();
     }
+
+    public void buscarPerro() {
+        perroEncontrado = listaPerros.encontrarxPosicion(datobuscar);
+
+    }
+
+    public void inicializarModelo() {
+        //Instanciar e modelo
+        model = new DefaultDiagramModel();
+        //Definirle al modelo la cantidad de enlaces -1 (infinito)
+        model.setMaxConnections(-1);
+        
+        FlowChartConnector connector = new FlowChartConnector();
+        connector.setPaintStyle("{strokeStyle:'#C7B097',lineWidth:3}");
+        model.setDefaultConnector(connector);
+        
+        //pregunto si hay datos
+        if (listaPerros.getCabeza() != null) {
+            //Llamo a mi ayudante y lo ubico en el primero
+            Nodo ayudante = listaPerros.getCabeza();
+            //recorro mientras el ayudante tenga datos
+            int posX = 2;
+            int posY = 2;
+            while (ayudante != null) {
+                Element perroPintar = new Element(ayudante.getDato().getNombre(), posX + "em", posY + "em");
+                
+                if(ayudante.equals(ayudanteColor))
+                {
+                    perroPintar.setStyleClass("ui-diagram-success");
+                }
+
+                
+                
+                perroPintar.addEndPoint(new BlankEndPoint(EndPointAnchor.BOTTOM_RIGHT));
+                perroPintar.addEndPoint(new BlankEndPoint(EndPointAnchor.TOP));
+                model.addElement(perroPintar);
+                ayudante = ayudante.getSiguiente();
+                posX = posX + 5;
+                posY = posY + 5;
+            }
+
+            // el ayudante quedo en el enlace del último
+            //Ya pinte todos los elementos y los puntos de enlace
+            for(int i=0; i < model.getElements().size() -1 ;i++ )
+            {
+                model.connect(createConnection(model.getElements().get(i).getEndPoints().get(0), 
+                        model.getElements().get(i+1).getEndPoints().get(1), null));
+            }
+        }
+    }
+
+    public DiagramModel getModel() {
+        return model;
+    }
+
+    private Connection createConnection(EndPoint from, EndPoint to, String label) {
+        Connection conn = new Connection(from, to);
+        conn.getOverlays().add(new ArrowOverlay(20, 20, 1, 1));
+
+        if (label != null) {
+            conn.getOverlays().add(new LabelOverlay(label, "flow-label", 0.5));
+        }
+
+        return conn;
+    }
     
+    
+    public String irCrearPerro()
+    {
+        perroEncontrado = new Perro();        
+        return "crear";
+    }
+    
+    
+    public void guardarPerro()
+    {
+       switch(seleccionUbicacion)
+       {
+           case 1:
+               listaPerros.adicionarNodoAlInicio(perroEncontrado);
+               break;
+           case 2:
+               listaPerros.adicionarNodo(perroEncontrado);
+               break;
+           default: listaPerros.adicionarNodo(perroEncontrado);
+       }     
+       totalPerros++;
+       perroEncontrado = new Perro();
+       irPrimero();
+       JsfUtil.addSuccessMessage("Se ha adicionado el perro a la lista");
+    }
+    
+    
+    public String irHome()
+    {
+        perroEncontrado = new Perro();        
+        //pinta
+        inicializarModelo();
+        return "home";
+    }
+
+    
+    public void controlarCiclo()
+    {
+        textoBotonIniciar="Iniciar";
+        colorBoton ="blue";
+        estadoCiclo= !estadoCiclo;
+        if(estadoCiclo)
+        {
+            textoBotonIniciar="Parar";
+            colorBoton ="red";
+        }
+    }
+    
+    public void pasarSiguienteColor()
+    {
+        if(ayudanteColor.getSiguiente()!=null)
+        {
+            ayudanteColor= ayudanteColor.getSiguiente();
+        }
+        else
+        {
+            ayudanteColor= listaPerros.getCabeza();
+        }
+        inicializarModelo();
+    }
     
 }
